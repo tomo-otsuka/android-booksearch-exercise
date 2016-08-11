@@ -1,14 +1,16 @@
 package com.codepath.android.booksearch.models;
 
-import android.text.TextUtils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.text.TextUtils;
+
 import java.util.ArrayList;
 
-public class Book {
+public class Book implements Parcelable {
     private String openLibraryId;
     private String author;
     private String title;
@@ -30,6 +32,9 @@ public class Book {
         return "http://covers.openlibrary.org/b/olid/" + openLibraryId + "-L.jpg?default=false";
     }
 
+    public Book() {
+        // Normal actions performed by class, since this is still a normal object!
+    }
     // Returns a Book given the expected JSON
     public static Book fromJson(JSONObject jsonObject) {
         Book book = new Book();
@@ -87,4 +92,42 @@ public class Book {
         }
         return books;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(author);
+        parcel.writeString(title);
+        parcel.writeString(openLibraryId);
+    }
+
+    private Book(Parcel in) {
+        author = in.readString();
+        title = in.readString();
+        openLibraryId = in.readString();
+    }
+
+    // After implementing the `Parcelable` interface, we need to create the 
+    // `Parcelable.Creator<Book> CREATOR` constant for our class; 
+    // Notice how it has our class specified as its type.  
+    public static final Parcelable.Creator<Book> CREATOR
+            = new Parcelable.Creator<Book>() {
+
+        // This simply calls our new constructor (typically private) and 
+        // passes along the unmarshalled `Parcel`, and then returns the new object!
+        @Override
+        public Book createFromParcel(Parcel in) {
+            return new Book(in);
+        }
+
+        // We just need to copy this and change the type to match our class.
+        @Override
+        public Book[] newArray(int size) {
+            return new Book[size];
+        }
+    };
 }
